@@ -17,8 +17,12 @@ var contractInstance = contractObject.at(contractAddress);
 console.log(JSON.stringify(contractAbi));
 
 contractInstance.setGreeting('Hello Blockchain!', function(error, response) {
+    if (error)
+        throw error;
     console.log('set greeting: ' + response);
     contractInstance.getGreeting(function(error2, response2) {
+        if (error2)
+            throw error2;
         console.log('got greeting: ' + response2);
     });
 });
