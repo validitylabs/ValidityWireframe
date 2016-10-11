@@ -1,4 +1,4 @@
-contract LockTimeContract
+contract timeLock
 {
     // custom data structure to hold locked funds and time
     struct accountData
