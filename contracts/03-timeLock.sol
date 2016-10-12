@@ -22,11 +22,11 @@ contract timeLock
         uint amount = msg.value;
         payOut();
         if (accounts[msg.sender].balance > 0)
-            msg.sender.send(msg.value);
+            throw;
         else
         {
             accounts[msg.sender].balance = amount;
-                accounts[msg.sender].releaseTime = now + lockTimeS;
+            accounts[msg.sender].releaseTime = now + lockTimeS;
     	}
     }
     
@@ -35,8 +35,7 @@ contract timeLock
         if (accounts[msg.sender].balance != 0 && accounts[msg.sender].releaseTime < now)
         {
             msg.sender.send(accounts[msg.sender].balance);
-            accounts[msg.sender].balance = 0;
-            accounts[msg.sender].releaseTime = 0;
+            delete accounts[msg.sender];
         }
     }
     
