@@ -1,11 +1,28 @@
-contract tokenContract {
+contract ownerControlled {
+    address owner;
+
+    modifier onlyOwner() {
+        if (msg.sender != owner)
+            throw;
+        else
+            _
+    }
+    
+    function ownerControlled() {
+        owner = msg.sender;
+    }
+    
+    function transferOwner(address newOwner) onlyOwner {
+        owner = newOwner;
+    }
+}
+
+contract tokenContract is ownerControlled{
     mapping (address => uint) balance;
     mapping (address => bool) frozen;
-    address owner;
 
     function tokenContract(uint supply) {
         balance[msg.sender] = supply;
-        owner = msg.sender;
     }
     
     function pay(uint amount, address to) {
@@ -15,17 +32,6 @@ contract tokenContract {
             throw;
         balance[msg.sender] -= amount;
         balance[to] += amount;
-    }
-    
-    modifier onlyOwner() {
-        if (msg.sender != owner)
-            throw;
-        else
-            _
-    }
-    
-    function transferOwner(address newOwner) onlyOwner {
-        owner = newOwner;
     }
     
     function issueTokens(uint amount, address to) onlyOwner {

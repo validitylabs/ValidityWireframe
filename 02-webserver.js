@@ -29,10 +29,6 @@ contractInstance.setGreeting('Hello Blockchain!', function(error, response) {
     });
 });
 
-//app.get('/', (req, res) => {
-//    res.send('Hello from Express');
-//})
-
 app.get('/getGreeting', (req, res) => {
     contractInstance.getGreeting(function(error, response) {
         res.send('greeting: ' + response);

@@ -2,6 +2,7 @@ contract test {
     address owner;
     uint counter;
     uint totalPayIn;
+    int[] intArray;
     
     function test() {
         // constructor
@@ -45,5 +46,13 @@ contract test {
     
     function kill() onlyOwner {
         suicide(owner);
+    }
+    
+    function addToArray(int i) {
+        intArray.push(i);
+    }
+
+    function getFromArray(uint index) constant returns (int i) {
+        i = intArray[index];
     }
 }
