@@ -18,6 +18,7 @@
   "homepage": "https://github.com/validitylabs/ValidityWireframe#readme",
   "dependencies": {
     "express": "^4.14.0",
+    "ipfs-api": "^9.0.0",
     "web3": "^0.17.0-beta"
   }
 }
