@@ -1,4 +1,5 @@
 contract ownerControlled {
+
     address owner;
 
     modifier onlyOwner() {
@@ -17,6 +18,25 @@ contract ownerControlled {
     }
 }
 
+contract tokenContract {
+    mapping (address => uint) balance;
+
+    function tokenContract(uint supply) {
+        balance[msg.sender] = supply;
+    }
+
+    function pay(uint amount, address to) {
+        if (balance[msg.sender] < amount)
+            throw;
+        balance[msg.sender] -= amount;
+        balance[to] += amount;
+    }
+    
+    function getBalance(address addr) constant returns (uint b) {
+        b = balance[addr];
+    }
+}
+
 contract messageBoard is ownerControlled {
 
     tokenContract myTokenContract;
@@ -32,14 +52,18 @@ contract messageBoard is ownerControlled {
 
     m[] msgs;
     
-    function setTokenContract(address tokenContractAddress) onlyOwner {
+    function messageBoard(address myTokenContractAddress) {
+        myTokenContract = tokenContract(myTokenContractAddress);
+    }
+    
+/*    function setTokenContract(address tokenContractAddress) onlyOwner {
         // only allow tokenContract to be set once (ensures limited supply)
         if (address(myTokenContract) != 0)
             throw;
 
         myTokenContract = tokenContract(tokenContractAddress);
     }
-    
+  */  
     function setCostPerMessage(uint price) onlyOwner {
         pricePerMessage = price;
     }
@@ -49,7 +73,7 @@ contract messageBoard is ownerControlled {
     }
 
     function addMessage(string text) {
-        myTokenContract.pay(1, this);
+        myTokenContract.pay(pricePerMessage, this);
         msgs.push(m(msg.sender, text, now, msg.value, false));
     }
     
@@ -70,24 +94,5 @@ contract messageBoard is ownerControlled {
         time = msgs[id].time;
         val = msgs[id].val;
         deleted = msgs[id].deleted;
-    }
-}
-
-contract tokenContract {
-    mapping (address => uint) balance;
-
-    function tokenContract(uint supply) {
-        balance[msg.sender] = supply;
-    }
-
-    function pay(uint amount, address to) {
-        if (balance[msg.sender] < amount)
-            throw;
-        balance[msg.sender] -= amount;
-        balance[to] += amount;
-    }
-    
-    function getBalance(address addr) constant returns (uint b) {
-        b = balance[addr];
     }
 }
