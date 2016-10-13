@@ -27,17 +27,27 @@ contract timeLock {
     }
 
     function payIn(uint lockTimeS) {
-        payOut();   // payout will throw if funds are not ready for pay out
+        if (account[msg.sender].balance != 0)
+            throw;  // we can only lock one value per account
+
         account[msg.sender].balance = msg.value;
         account[msg.sender].releaseTime = now + lockTimeS;
     }
     
     function payOut() noValue returns (bool success) {
-        // check if user has funds due for pay out because lock time is over
+        
+        // is there anything to send at all?
+        if (account[msg.sender].balance == 0)
+            throw;
+            
+        // are funds due yet?
         if (account[msg.sender].balance != 0 && account[msg.sender].releaseTime > now)
             throw;
+        
+        // send funds back
         success = msg.sender.send(account[msg.sender].balance);
-        delete account[msg.sender];
+        if (success)
+            delete account[msg.sender];
     }
     
     // some helper functions for demo purposes (not required)

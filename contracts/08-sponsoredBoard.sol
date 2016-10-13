@@ -26,9 +26,12 @@ contract tokenContract {
     }
 
     function pay(uint amount, address to) {
-        if (balance[msg.sender] < amount)
+        // todo: tx.origin should be avoided for future Ethereum releases
+        //       also bad practice as it does not allow for token-holding 
+        //       contracts to send messages to the board
+        if (balance[tx.origin] < amount)
             throw;
-        balance[msg.sender] -= amount;
+        balance[tx.origin] -= amount;
         balance[to] += amount;
     }
     
@@ -40,8 +43,11 @@ contract tokenContract {
 contract messageBoard is ownerControlled {
 
     tokenContract myTokenContract;
+    
     uint pricePerMessage;
 
+    event receivedMessage(address sender, string text, uint time, uint val);
+    
     struct m {
         address sender;
         string text;
@@ -51,19 +57,15 @@ contract messageBoard is ownerControlled {
     }
 
     m[] msgs;
-    
-    function messageBoard(address myTokenContractAddress) {
-        myTokenContract = tokenContract(myTokenContractAddress);
-    }
-    
-/*    function setTokenContract(address tokenContractAddress) onlyOwner {
+
+    function setTokenContract(address tokenContractAddress) onlyOwner {
         // only allow tokenContract to be set once (ensures limited supply)
         if (address(myTokenContract) != 0)
             throw;
 
         myTokenContract = tokenContract(tokenContractAddress);
     }
-  */  
+
     function setCostPerMessage(uint price) onlyOwner {
         pricePerMessage = price;
     }
@@ -75,6 +77,7 @@ contract messageBoard is ownerControlled {
     function addMessage(string text) {
         myTokenContract.pay(pricePerMessage, this);
         msgs.push(m(msg.sender, text, now, msg.value, false));
+        receivedMessage(msg.sender, text, now, msg.value);
     }
     
     function getNumMessages() constant returns (uint n) {
