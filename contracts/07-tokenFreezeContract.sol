@@ -19,6 +19,7 @@ contract ownerControlled {
 
 contract tokenContract is ownerControlled{
     mapping (address => uint) balance;
+    mapping (address => bool) frozen;
 
     function tokenContract(uint supply) {
         balance[msg.sender] = supply;
@@ -26,6 +27,8 @@ contract tokenContract is ownerControlled{
     
     function pay(uint amount, address to) {
         if (balance[msg.sender] < amount)
+            throw;
+        if (frozen[msg.sender])
             throw;
         balance[msg.sender] -= amount;
         balance[to] += amount;
@@ -35,6 +38,14 @@ contract tokenContract is ownerControlled{
         balance[to] += amount;
     }
     
+    function freeze(address addr) onlyOwner {
+        frozen[addr] = true;
+    }
+    
+    function unfreeze(address addr) onlyOwner {
+        frozen[addr] = false;
+    }
+
     function getBalance(address addr) constant returns (uint b) {
         b = balance[addr];
     }
