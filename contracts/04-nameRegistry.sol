@@ -20,4 +20,12 @@ contract nameRegistry {
         delete nameReg[addrReg[msg.sender]];
         delete addrReg[msg.sender];
     }
+    
+    function getName(address a) constant returns (string name) {
+        return addrReg[a];
+    }
+    
+    function getAddress(string s) constant returns (address a) {
+        return nameReg[s];
+    }
 }
