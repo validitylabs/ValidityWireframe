@@ -1,11 +1,6 @@
-contract timeLock {
-// send some amount (in Wei) when calling the payIn function
-// the amount will then be placed in a locked account
-// the funds will be released once the indicated lock time in seconds
-// passed and can only be retrieved by the same account which was
-// depositing them - highlighting the intrinsic security model
-// offered by a blockchain system like Ethereum
-    
+pragma solidity ^0.4.12;
+
+contract TimeLock {
     // custom data structure to hold locked funds and time
     struct accountData {
         uint balance;
@@ -13,53 +8,45 @@ contract timeLock {
     }
 
     // only one locked account per address
-    mapping (address => accountData) account;
-    
-    modifier noValue() {
-        if (msg.value != 0)
-            throw;
-        else
-            _
+    mapping (address => accountData) accounts;
+
+    function payIn(uint lockTimeS) payable {
+        // send some amount (in Wei) when calling this function.
+        // the amount will then be placed in a locked account
+        // the funds will be released once the indicated lock time in seconds
+        // passed and can only be retrieved by the same account which was
+        // depositing them - highlighting the intrinsic security model
+        // offered by a blockchain system like Ethereum
+
+        uint amount = msg.value;
+        payOut();
+        if (accounts[msg.sender].balance > 0)
+            msg.sender.send(msg.value);
+        else {
+            accounts[msg.sender].balance = amount;
+            accounts[msg.sender].releaseTime = now + lockTimeS;
+        }
     }
     
-    function () noValue {
-        // prevents contract to randomly get money that belongs to no one
+    function payOut() {
+        // check if user has funds due for pay out because lock time is over
+        if (accounts[msg.sender].balance != 0 && accounts[msg.sender].releaseTime < now) {
+            msg.sender.send(accounts[msg.sender].balance);
+            accounts[msg.sender].balance = 0;
+            accounts[msg.sender].releaseTime = 0;
+        }
     }
 
-    function payIn(uint lockTimeS) {
-        if (account[msg.sender].balance != 0)
-            throw;  // we can only lock one value per account
-
-        account[msg.sender].balance = msg.value;
-        account[msg.sender].releaseTime = now + lockTimeS;
-    }
-    
-    function payOut() noValue returns (bool success) {
-        
-        // is there anything to send at all?
-        if (account[msg.sender].balance == 0)
-            throw;
-            
-        // are funds due yet?
-        if (account[msg.sender].balance != 0 && account[msg.sender].releaseTime > now)
-            throw;
-        
-        // send funds back
-        success = msg.sender.send(account[msg.sender].balance);
-        if (success)
-            delete account[msg.sender];
-    }
-    
     // some helper functions for demo purposes (not required)
-    function getMyLockedFunds() constant returns (uint v) {
-        v = account[msg.sender].balance;
+    function getMyLockedFunds() constant returns (uint x) {
+        return accounts[msg.sender].balance;
     }
     
-    function getMyLockedFundsReleaseTime() constant returns (uint t) {
-        t = account[msg.sender].releaseTime;
+    function getMyLockedFundsReleaseTime() constant returns (uint x) {
+	    return accounts[msg.sender].releaseTime;
     }
-    
-    function getNow() constant returns (uint n) {
-        n = now;
+
+    function getNow() constant returns (uint x) {
+        return now;
     }
 }
