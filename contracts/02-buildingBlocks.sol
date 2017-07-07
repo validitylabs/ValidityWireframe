@@ -1,4 +1,21 @@
-contract test {
+pragma solidity ^0.4.12;
+
+/*
+   example showing basic features of Solidity
+   - type int
+   - type address
+   - arrays
+   - constructor
+   - msg.sender
+   - modifiers
+   - fallback function
+   - constant
+   - return values
+   - returning multiple values
+   - payable modifier
+*/
+
+contract BasicBuildingBlocks {
     address owner;
     uint counter;
     uint totalPayIn;
@@ -10,10 +27,8 @@ contract test {
     }
     
     modifier onlyOwner() {
-        if (msg.sender != owner)
-            throw;
-        else
-            _
+        require(msg.sender != owner);
+        _;
     }
     
     function () {
@@ -35,7 +50,7 @@ contract test {
         return owner.send(this.balance);
     }
     
-    function payIn() {
+    function payIn() payable {
         // tracks balance paid in via this function only!
         totalPayIn += msg.value;
     }
@@ -45,7 +60,7 @@ contract test {
     }
     
     function kill() onlyOwner {
-        suicide(owner);
+        selfdestruct(owner);
     }
     
     function addToArray(int i) {
